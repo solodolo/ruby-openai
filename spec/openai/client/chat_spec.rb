@@ -94,7 +94,7 @@ RSpec.describe OpenAI::Client do
                   @chunks = []
                 end
 
-                def call(chunk)
+                def call(chunk, is_done)
                   @chunks << chunk
                 end
               end.new

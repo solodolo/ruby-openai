@@ -131,7 +131,7 @@ RSpec.describe OpenAI::HTTP do
 
       context "when called with a string containing a single JSON object" do
         it "calls the user proc with the data parsed as JSON" do
-          expect(user_proc).to receive(:call).with(JSON.parse('{"foo": "bar"}'))
+          expect(user_proc).to receive(:call).with(JSON.parse('{"foo": "bar"}'), false)
           stream.call(<<~CHUNK)
             data: { "foo": "bar" }
 
@@ -142,8 +142,9 @@ RSpec.describe OpenAI::HTTP do
 
       context "when called with a string containing more than one JSON object" do
         it "calls the user proc for each data parsed as JSON" do
-          expect(user_proc).to receive(:call).with(JSON.parse('{"foo": "bar"}'))
-          expect(user_proc).to receive(:call).with(JSON.parse('{"baz": "qud"}'))
+          expect(user_proc).to receive(:call).with(JSON.parse('{"foo": "bar"}'), false)
+          expect(user_proc).to receive(:call).with(JSON.parse('{"baz": "qud"}'), false)
+          expect(user_proc).to receive(:call).with({}, true)
 
           stream.call(<<~CHUNK)
             data: { "foo": "bar" }
@@ -169,7 +170,7 @@ RSpec.describe OpenAI::HTTP do
         end
 
         it "raise an error" do
-          expect(user_proc).to receive(:call).with(JSON.parse('{"foo": "bar"}'))
+          expect(user_proc).to receive(:call).with(JSON.parse('{"foo": "bar"}'), false)
 
           expect do
             stream.call(chunk)
@@ -179,7 +180,7 @@ RSpec.describe OpenAI::HTTP do
 
       context "when called with JSON split across chunks" do
         it "calls the user proc with the data parsed as JSON" do
-          expect(user_proc).to receive(:call).with(JSON.parse('{ "foo": "bar" }'))
+          expect(user_proc).to receive(:call).with(JSON.parse('{ "foo": "bar" }'), false)
           expect do
             stream.call("data: { \"foo\":")
             stream.call(" \"bar\" }\n\n")
